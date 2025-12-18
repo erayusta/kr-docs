@@ -1,0 +1,607 @@
+openapi: 3.0.3
+info:
+  title: KampanyaRadar API
+  version: "1.0.0"
+  description: |
+    REST API for KampanyaRadar (Laravel 12).
+    This OpenAPI document covers the primary v1 endpoints used by the frontend.
+
+servers:
+  - url: http://localhost:8080/api/v1
+    description: Local (Docker)
+  - url: https://eru.kampanyaradar.com/api/v1
+    description: Production
+
+tags:
+  - name: Auth
+  - name: Home
+  - name: Campaigns
+  - name: Categories
+  - name: Brands
+  - name: Posts
+  - name: Leads
+  - name: Loans
+  - name: Product
+  - name: Pages
+  - name: Settings
+  - name: Ads
+  - name: Sitemap
+
+paths:
+  /:
+    get:
+      summary: Fetch homepage data
+      tags: [Home]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  categories:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Category'
+                  sliders:
+                    type: array
+                    items:
+                      type: object
+                  brands:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Brand'
+                  ads:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Ad'
+                  posts:
+                    type: array
+                    items:
+                      type: object
+
+  /auth/login:
+    post:
+      summary: Login
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string, format: email }
+                password: { type: string, format: password }
+                remember: { type: boolean }
+      responses:
+        '200':
+          description: Logged in
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string }
+                  user: { $ref: '#/components/schemas/User' }
+                  token: { type: string }
+                  expires_at: { type: string, format: date-time }
+
+  /auth/register:
+    post:
+      summary: Register
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, email, password, password_confirmation]
+              properties:
+                name: { type: string }
+                email: { type: string, format: email }
+                password: { type: string, format: password }
+                password_confirmation: { type: string, format: password }
+                phone: { type: string }
+                birth_date: { type: string, format: date }
+                gender: { type: string, enum: [male,female,other] }
+      responses:
+        '201': { description: Created }
+
+  /auth/logout:
+    post:
+      summary: Logout
+      tags: [Auth]
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200': { description: OK }
+
+  /auth/me:
+    get:
+      summary: Current user
+      tags: [Auth]
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user: { $ref: '#/components/schemas/User' }
+
+  /campaigns:
+    get:
+      summary: List campaigns
+      tags: [Campaigns]
+      parameters:
+        - in: query
+          name: page
+          schema: { type: integer, minimum: 1 }
+        - in: query
+          name: startDate
+          schema: { type: string, format: date-time }
+        - in: query
+          name: endDate
+          schema: { type: string, format: date-time }
+        - in: query
+          name: category
+          schema: { type: string }
+        - in: query
+          name: brand
+          schema: { type: string }
+        - in: query
+          name: search
+          schema: { type: string }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/CampaignBasic' }
+                  pagination: { $ref: '#/components/schemas/Pagination' }
+
+  /campaigns/{slug}:
+    get:
+      summary: Campaign detail
+      tags: [Campaigns]
+      parameters:
+        - in: path
+          name: slug
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: '#/components/schemas/CampaignDetail' }
+                  related:
+                    type: array
+                    items: { $ref: '#/components/schemas/CampaignBasic' }
+        '404': { description: Not found }
+
+  /brands:
+    get:
+      summary: List brands
+      tags: [Brands]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Brand' }
+
+  /brands/all:
+    get:
+      summary: List all brands (admin use)
+      tags: [Brands]
+      responses:
+        '200': { description: OK }
+
+  /brands/{slug}:
+    get:
+      summary: Brand detail + campaigns
+      tags: [Brands]
+      parameters:
+        - in: path
+          name: slug
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: OK }
+
+  /categories:
+    get:
+      summary: List categories
+      tags: [Categories]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Category' }
+
+  /categories/{slug}:
+    get:
+      summary: Category detail + campaigns
+      tags: [Categories]
+      parameters:
+        - in: path
+          name: slug
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: OK }
+
+  /posts:
+    get:
+      summary: List posts
+      tags: [Posts]
+      responses:
+        '200': { description: OK }
+
+  /posts/{slug}:
+    get:
+      summary: Post detail
+      tags: [Posts]
+      parameters:
+        - in: path
+          name: slug
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: OK }
+
+  /leads:
+    post:
+      summary: Submit lead
+      tags: [Leads]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [campaign_id, name, email]
+              properties:
+                campaign_id: { type: integer }
+                name: { type: string }
+                email: { type: string, format: email }
+                phone: { type: string }
+                form_data: { type: object }
+      responses:
+        '200': { description: OK }
+        '201': { description: Created }
+
+  /loans:
+    get:
+      summary: List banks and loan products
+      tags: [Loans]
+      parameters:
+        - in: query
+          name: brand
+          schema: { type: string }
+        - in: query
+          name: loan_type
+          schema: { type: string, enum: [personal,auto,mortgage,business,vehicle,used_car] }
+        - in: query
+          name: search
+          schema: { type: string }
+      responses:
+        '200': { description: OK }
+
+  /loans/calculations:
+    post:
+      summary: Calculate loan comparisons
+      tags: [Loans]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [amount, months, loan_type]
+              properties:
+                amount: { type: number, minimum: 1000 }
+                months: { type: integer, minimum: 1 }
+                loan_type: { type: string, enum: [personal,auto,mortgage,business] }
+                banks:
+                  type: array
+                  items: { type: integer }
+      responses:
+        '200': { description: OK }
+
+  /loan/offers:
+    get:
+      summary: Loan offers (listing)
+      tags: [Loans]
+      parameters:
+        - in: query
+          name: amount
+          schema: { type: number, default: 10000 }
+        - in: query
+          name: maturity
+          schema: { type: integer, default: 12 }
+        - in: query
+          name: loanType
+          schema: { type: string, default: personal }
+        - in: query
+          name: limit
+          schema: { type: integer, default: 8 }
+      responses:
+        '200': { description: OK }
+
+  /loan/{loanType}:
+    get:
+      summary: Loan type page data
+      tags: [Loans]
+      parameters:
+        - in: path
+          name: loanType
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: OK }
+
+  /loan/{loanType}/{bankSlug}:
+    get:
+      summary: Bank loan page
+      tags: [Loans]
+      parameters:
+        - in: path
+          name: loanType
+          required: true
+          schema: { type: string }
+        - in: path
+          name: bankSlug
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: OK }
+
+  /loan/{loanType}/{bankSlug}/detail:
+    get:
+      summary: Bank loan detail with calculation
+      tags: [Loans]
+      parameters:
+        - in: path
+          name: loanType
+          required: true
+          schema: { type: string }
+        - in: path
+          name: bankSlug
+          required: true
+          schema: { type: string }
+        - in: query
+          name: amount
+          schema: { type: number, default: 10000 }
+        - in: query
+          name: maturity
+          schema: { type: integer, default: 12 }
+      responses:
+        '200': { description: OK }
+
+  /loan-calculate:
+    get:
+      summary: Alias for loan offers
+      tags: [Loans]
+      responses:
+        '200': { description: OK }
+
+  /product:
+    get:
+      summary: List products
+      tags: [Product]
+      responses:
+        '200': { description: OK }
+
+  /page/{slug}:
+    get:
+      summary: CMS page by slug
+      tags: [Pages]
+      parameters:
+        - in: path
+          name: slug
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: OK }
+
+  /settings:
+    get:
+      summary: All settings (key-value)
+      tags: [Settings]
+      responses:
+        '200': { description: OK }
+
+  /settings/group/{group}:
+    get:
+      summary: Settings by group
+      tags: [Settings]
+      parameters:
+        - in: path
+          name: group
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: OK }
+
+  /settings/{key}:
+    get:
+      summary: Single setting by key
+      tags: [Settings]
+      parameters:
+        - in: path
+          name: key
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: OK }
+
+  /ads:
+    get:
+      summary: List filtered ads
+      tags: [Ads]
+      parameters:
+        - in: query
+          name: position
+          schema: { type: string }
+        - in: query
+          name: device
+          schema: { type: string, enum: [desktop, mobile, both], default: both }
+        - in: query
+          name: item_type
+          schema: { type: string, enum: [general, brand, category, campaign] }
+        - in: query
+          name: item
+          schema: { type: string }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Ad' }
+
+  /generate-sitemap:
+    get:
+      summary: Generate or fetch sitemap data
+      tags: [Sitemap]
+      responses:
+        '200': { description: OK }
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    User:
+      type: object
+      properties:
+        id: { type: integer }
+        first_name: { type: string }
+        last_name: { type: string }
+        email: { type: string, format: email }
+        phone: { type: string }
+        role: { type: string }
+        is_active: { type: boolean }
+
+    Brand:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        slug: { type: string }
+        logo: { type: string, nullable: true }
+
+    Category:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        slug: { type: string }
+
+    Ad:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        type: { type: string, enum: [image, html] }
+        dimensions: { type: string, nullable: true }
+        position: { type: string }
+        image: { type: string, nullable: true }
+        link: { type: string, nullable: true }
+        code: { type: string, nullable: true }
+        item_type: { type: string, enum: [general, brand, category, campaign] }
+        device: { type: string, enum: [desktop, mobile, both] }
+
+    CampaignBasic:
+      type: object
+      properties:
+        id: { type: integer }
+        title: { type: string }
+        slug: { type: string }
+        image: { type: string, nullable: true }
+        startDate: { type: string, format: date-time, nullable: true }
+        endDate: { type: string, format: date-time, nullable: true }
+        brands:
+          type: array
+          items: { $ref: '#/components/schemas/Brand' }
+        categories:
+          type: array
+          items: { $ref: '#/components/schemas/Category' }
+
+    LeadForm:
+      type: object
+      properties:
+        id: { type: integer }
+        title: { type: string }
+        description: { type: string }
+        button_text: { type: string }
+        fields:
+          type: array
+          items: { type: object }
+
+    Product:
+      type: object
+      properties:
+        id: { type: integer }
+        title: { type: string }
+        description: { type: string }
+        gtin: { type: string }
+
+    CampaignDetail:
+      type: object
+      properties:
+        id: { type: integer }
+        title: { type: string }
+        slug: { type: string }
+        content: { type: string }
+        image: { type: string, nullable: true }
+        start_date: { type: string, format: date-time, nullable: true }
+        end_date: { type: string, format: date-time, nullable: true }
+        is_active: { type: boolean }
+        coupon_code: { type: string, nullable: true }
+        link: { type: string, nullable: true }
+        item_type: { type: string }
+        brands:
+          type: array
+          items: { $ref: '#/components/schemas/Brand' }
+        categories:
+          type: array
+          items: { $ref: '#/components/schemas/Category' }
+        lead_form: { $ref: '#/components/schemas/LeadForm' }
+        product: { $ref: '#/components/schemas/Product' }
+
+    Pagination:
+      type: object
+      properties:
+        currentPage: { type: integer }
+        totalPages: { type: integer }
+        totalCount: { type: integer }
+        hasNextPage: { type: boolean }
+        hasPrevPage: { type: boolean }
+        nextPage: { type: integer, nullable: true }
+        prevPage: { type: integer, nullable: true }
+
