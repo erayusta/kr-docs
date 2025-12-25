@@ -412,6 +412,40 @@ paths:
       responses:
         '200': { description: OK }
 
+  /products/{gtin}/prices:
+    get:
+      summary: Product price history (up to 365 days)
+      tags: [Product]
+      parameters:
+        - in: path
+          name: gtin
+          required: true
+          schema: { type: string }
+        - in: query
+          name: from
+          schema: { type: string, format: date }
+          description: Start date (inclusive), format YYYY-MM-DD
+        - in: query
+          name: to
+          schema: { type: string, format: date }
+          description: End date (inclusive), format YYYY-MM-DD
+        - in: query
+          name: store
+          schema: { type: string, enum: [migros, sok, a101, carrefour] }
+          description: Optional store filter
+        - in: query
+          name: limit
+          schema: { type: integer, default: 365, maximum: 365 }
+          description: Max number of rows to return (default 365)
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductPriceHistoryResponse'
+        '404': { description: Product not found }
+
   /page/{slug}:
     get:
       summary: CMS page by slug
@@ -571,6 +605,26 @@ components:
         description: { type: string }
         gtin: { type: string }
 
+    PriceHistoryPoint:
+      type: object
+      properties:
+        date: { type: string, format: date }
+        store: { type: string, enum: [migros, sok, a101, carrefour] }
+        price: { type: number, format: float }
+
+    ProductPriceHistoryResponse:
+      type: object
+      properties:
+        product:
+          type: object
+          properties:
+            id: { type: integer }
+            gtin: { type: string }
+            title: { type: string }
+        prices:
+          type: array
+          items: { $ref: '#/components/schemas/PriceHistoryPoint' }
+
     CampaignDetail:
       type: object
       properties:
@@ -604,4 +658,5 @@ components:
         hasPrevPage: { type: boolean }
         nextPage: { type: integer, nullable: true }
         prevPage: { type: integer, nullable: true }
+
 
