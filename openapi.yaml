@@ -646,7 +646,28 @@ components:
           type: array
           items: { $ref: '#/components/schemas/Category' }
         lead_form: { $ref: '#/components/schemas/LeadForm' }
-        product: { $ref: '#/components/schemas/Product' }
+        product:
+          allOf:
+            - $ref: '#/components/schemas/Product'
+            - type: object
+              properties:
+                latest_date:
+                  type: string
+                  format: date
+                  nullable: true
+                  description: Latest snapshot date in product_price_histories.
+                latest_prices:
+                  type: array
+                  description: Store prices on latest_date from product_price_histories.
+                  items:
+                    type: object
+                    properties:
+                      store: { type: string }
+                      price: { type: number, format: float }
+                price_histories:
+                  type: array
+                  description: Flattened history rows (up to last 365) from product_price_histories.
+                  items: { $ref: '#/components/schemas/PriceHistoryPoint' }
 
     Pagination:
       type: object
@@ -658,5 +679,4 @@ components:
         hasPrevPage: { type: boolean }
         nextPage: { type: integer, nullable: true }
         prevPage: { type: integer, nullable: true }
-
 
