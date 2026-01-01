@@ -188,6 +188,10 @@ paths:
                 type: object
                 properties:
                   data: { $ref: '#/components/schemas/CampaignDetail' }
+                  sections:
+                    description: Present for `item_type=actual` campaigns
+                    type: array
+                    items: { $ref: '#/components/schemas/ActualSection' }
                   related:
                     type: array
                     items: { $ref: '#/components/schemas/CampaignBasic' }
@@ -444,7 +448,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProductPriceHistoryResponse'
-        '404': { description: Product not found }
+        '404':
+          description: Product not found
 
   /page/{slug}:
     get:
@@ -579,6 +584,11 @@ components:
         image: { type: string, nullable: true }
         startDate: { type: string, format: date-time, nullable: true }
         endDate: { type: string, format: date-time, nullable: true }
+        item_type: { type: string, description: "Campaign type (e.g., general, actual, product, car, real-estate, coupon, credit)" }
+        primary_brand:
+          description: First associated brand for convenience
+          allOf: [ { $ref: '#/components/schemas/Brand' } ]
+          nullable: true
         brands:
           type: array
           items: { $ref: '#/components/schemas/Brand' }
@@ -637,8 +647,14 @@ components:
         end_date: { type: string, format: date-time, nullable: true }
         is_active: { type: boolean }
         coupon_code: { type: string, nullable: true }
+        coupon_discount: { type: string, nullable: true }
+        coupon_terms: { type: string, nullable: true }
         link: { type: string, nullable: true }
         item_type: { type: string }
+        primary_brand:
+          description: First associated brand for convenience
+          allOf: [ { $ref: '#/components/schemas/Brand' } ]
+          nullable: true
         brands:
           type: array
           items: { $ref: '#/components/schemas/Brand' }
@@ -646,28 +662,35 @@ components:
           type: array
           items: { $ref: '#/components/schemas/Category' }
         lead_form: { $ref: '#/components/schemas/LeadForm' }
-        product:
-          allOf:
-            - $ref: '#/components/schemas/Product'
-            - type: object
-              properties:
-                latest_date:
-                  type: string
-                  format: date
-                  nullable: true
-                  description: Latest snapshot date in product_price_histories.
-                latest_prices:
-                  type: array
-                  description: Store prices on latest_date from product_price_histories.
-                  items:
-                    type: object
-                    properties:
-                      store: { type: string }
-                      price: { type: number, format: float }
-                price_histories:
-                  type: array
-                  description: Flattened history rows (up to last 365) from product_price_histories.
-                  items: { $ref: '#/components/schemas/PriceHistoryPoint' }
+        product: { $ref: '#/components/schemas/Product' }
+
+    ActualItem:
+      type: object
+      description: Item within an actual section (subset)
+      properties:
+        id: { type: integer }
+        sort_order: { type: integer }
+        title: { type: string, nullable: true }
+        brand: { type: string, nullable: true }
+        unit_or_size: { type: string, nullable: true }
+        snapshot_date: { type: string, format: date, nullable: true }
+        snapshot_price: { type: number, format: float, nullable: true }
+        currency: { type: string, nullable: true }
+        store_brand: { type: string, nullable: true }
+        note: { type: string, nullable: true }
+        highlight: { type: boolean, nullable: true }
+        image_url: { type: string, nullable: true }
+
+    ActualSection:
+      type: object
+      description: Section of an actual campaign (e.g., category and its items)
+      properties:
+        id: { type: integer }
+        title: { type: string }
+        sort_order: { type: integer }
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/ActualItem' }
 
     Pagination:
       type: object
@@ -679,4 +702,3 @@ components:
         hasPrevPage: { type: boolean }
         nextPage: { type: integer, nullable: true }
         prevPage: { type: integer, nullable: true }
-
