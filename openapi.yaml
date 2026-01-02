@@ -642,6 +642,10 @@ components:
         title: { type: string }
         slug: { type: string }
         content: { type: string }
+        actual_content:
+          type: string
+          nullable: true
+          description: Content of the linked actual when item_type=actual and item_id references another actual; otherwise null. Use as a proxy for FE convenience.
         image: { type: string, nullable: true }
         start_date: { type: string, format: date-time, nullable: true }
         end_date: { type: string, format: date-time, nullable: true }
@@ -702,3 +706,4 @@ components:
         hasPrevPage: { type: boolean }
         nextPage: { type: integer, nullable: true }
         prevPage: { type: integer, nullable: true }
+
