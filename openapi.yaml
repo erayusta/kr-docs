@@ -33,7 +33,7 @@ paths:
       summary: Fetch homepage data
       tags: [Home]
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
@@ -43,7 +43,7 @@ paths:
                   categories:
                     type: array
                     items:
-                      $ref: '#/components/schemas/Category'
+                      $ref: "#/components/schemas/Category"
                   sliders:
                     type: array
                     items:
@@ -51,11 +51,11 @@ paths:
                   brands:
                     type: array
                     items:
-                      $ref: '#/components/schemas/Brand'
+                      $ref: "#/components/schemas/Brand"
                   ads:
                     type: array
                     items:
-                      $ref: '#/components/schemas/Ad'
+                      $ref: "#/components/schemas/Ad"
                   posts:
                     type: array
                     items:
@@ -77,7 +77,7 @@ paths:
                 password: { type: string, format: password }
                 remember: { type: boolean }
       responses:
-        '200':
+        "200":
           description: Logged in
           content:
             application/json:
@@ -85,7 +85,7 @@ paths:
                 type: object
                 properties:
                   message: { type: string }
-                  user: { $ref: '#/components/schemas/User' }
+                  user: { $ref: "#/components/schemas/User" }
                   token: { type: string }
                   expires_at: { type: string, format: date-time }
 
@@ -107,9 +107,9 @@ paths:
                 password_confirmation: { type: string, format: password }
                 phone: { type: string }
                 birth_date: { type: string, format: date }
-                gender: { type: string, enum: [male,female,other] }
+                gender: { type: string, enum: [male, female, other] }
       responses:
-        '201': { description: Created }
+        "201": { description: Created }
 
   /auth/logout:
     post:
@@ -117,7 +117,7 @@ paths:
       tags: [Auth]
       security: [{ bearerAuth: [] }]
       responses:
-        '200': { description: OK }
+        "200": { description: OK }
 
   /auth/me:
     get:
@@ -125,14 +125,14 @@ paths:
       tags: [Auth]
       security: [{ bearerAuth: [] }]
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  user: { $ref: '#/components/schemas/User' }
+                  user: { $ref: "#/components/schemas/User" }
 
   /campaigns:
     get:
@@ -158,7 +158,7 @@ paths:
           name: search
           schema: { type: string }
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
@@ -167,8 +167,8 @@ paths:
                 properties:
                   data:
                     type: array
-                    items: { $ref: '#/components/schemas/CampaignBasic' }
-                  pagination: { $ref: '#/components/schemas/Pagination' }
+                    items: { $ref: "#/components/schemas/CampaignBasic" }
+                  pagination: { $ref: "#/components/schemas/Pagination" }
 
   /campaigns/{slug}:
     get:
@@ -180,42 +180,42 @@ paths:
           required: true
           schema: { type: string }
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  data: { $ref: '#/components/schemas/CampaignDetail' }
+                  data: { $ref: "#/components/schemas/CampaignDetail" }
                   sections:
                     description: Present for `item_type=actual` campaigns
                     type: array
-                    items: { $ref: '#/components/schemas/ActualSection' }
+                    items: { $ref: "#/components/schemas/ActualSection" }
                   related:
                     type: array
-                    items: { $ref: '#/components/schemas/CampaignBasic' }
-        '404': { description: Not found }
+                    items: { $ref: "#/components/schemas/CampaignBasic" }
+        "404": { description: Not found }
 
   /brands:
     get:
       summary: List brands
       tags: [Brands]
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
               schema:
                 type: array
-                items: { $ref: '#/components/schemas/Brand' }
+                items: { $ref: "#/components/schemas/Brand" }
 
   /brands/all:
     get:
       summary: List all brands (admin use)
       tags: [Brands]
       responses:
-        '200': { description: OK }
+        "200": { description: OK }
 
   /brands/{slug}:
     get:
@@ -227,20 +227,20 @@ paths:
           required: true
           schema: { type: string }
       responses:
-        '200': { description: OK }
+        "200": { description: OK }
 
   /categories:
     get:
       summary: List categories
       tags: [Categories]
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
               schema:
                 type: array
-                items: { $ref: '#/components/schemas/Category' }
+                items: { $ref: "#/components/schemas/Category" }
 
   /categories/{slug}:
     get:
@@ -252,14 +252,14 @@ paths:
           required: true
           schema: { type: string }
       responses:
-        '200': { description: OK }
+        "200": { description: OK }
 
   /posts:
     get:
       summary: List posts
       tags: [Posts]
       responses:
-        '200': { description: OK }
+        "200": { description: OK }
 
   /posts/{slug}:
     get:
@@ -271,7 +271,7 @@ paths:
           required: true
           schema: { type: string }
       responses:
-        '200': { description: OK }
+        "200": { description: OK }
 
   /leads:
     post:
@@ -291,8 +291,8 @@ paths:
                 phone: { type: string }
                 form_data: { type: object }
       responses:
-        '200': { description: OK }
-        '201': { description: Created }
+        "200": { description: OK }
+        "201": { description: Created }
 
   /loans:
     get:
@@ -304,12 +304,16 @@ paths:
           schema: { type: string }
         - in: query
           name: loan_type
-          schema: { type: string, enum: [personal,auto,mortgage,business,vehicle,used_car] }
+          schema:
+            {
+              type: string,
+              enum: [personal, auto, mortgage, business, vehicle, used_car],
+            }
         - in: query
           name: search
           schema: { type: string }
       responses:
-        '200': { description: OK }
+        "200": { description: OK }
 
   /loans/calculations:
     post:
@@ -325,12 +329,56 @@ paths:
               properties:
                 amount: { type: number, minimum: 1000 }
                 months: { type: integer, minimum: 1 }
-                loan_type: { type: string, enum: [personal,auto,mortgage,business] }
+                loan_type:
+                  { type: string, enum: [personal, auto, mortgage] }
                 banks:
                   type: array
                   items: { type: integer }
       responses:
-        '200': { description: OK }
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        bank:
+                          type: object
+                          properties:
+                            id: { type: integer }
+                            name: { type: string }
+                            slug: { type: string, nullable: true }
+                            logo: { type: string, nullable: true }
+                        bracket:
+                          type: object
+                          properties:
+                            interestRate: { type: number }
+                            minAmount: { type: number }
+                            maxAmount: { type: number }
+                            minMaturity: { type: integer }
+                            maxMaturity: { type: integer }
+                            loan_type: { type: string, enum: [personal, auto, mortgage] }
+                        loan_details:
+                          type: object
+                          properties:
+                            amount: { type: number }
+                            months: { type: integer }
+                            interest_rate: { type: number }
+                            monthly_payment: { type: number }
+                            total_payment: { type: number }
+                  meta:
+                    type: object
+                    properties:
+                      amount: { type: number }
+                      maturity: { type: integer }
+                      loan_type: { type: string, enum: [personal, auto, mortgage] }
+                      as_of: { type: string, example: '2026-01' }
+                      month_label: { type: string, example: 'Ocak 2026' }
 
   /loan/offers:
     get:
@@ -350,7 +398,7 @@ paths:
           name: limit
           schema: { type: integer, default: 8 }
       responses:
-        '200': { description: OK }
+        "200": { description: OK }
 
   /loan/{loanType}:
     get:
@@ -362,7 +410,7 @@ paths:
           required: true
           schema: { type: string }
       responses:
-        '200': { description: OK }
+        "200": { description: OK }
 
   /loan/{loanType}/{bankSlug}:
     get:
@@ -378,7 +426,7 @@ paths:
           required: true
           schema: { type: string }
       responses:
-        '200': { description: OK }
+        "200": { description: OK }
 
   /loan/{loanType}/{bankSlug}/detail:
     get:
@@ -400,21 +448,21 @@ paths:
           name: maturity
           schema: { type: integer, default: 12 }
       responses:
-        '200': { description: OK }
+        "200": { description: OK }
 
   /loan-calculate:
     get:
       summary: Alias for loan offers
       tags: [Loans]
       responses:
-        '200': { description: OK }
+        "200": { description: OK }
 
   /product:
     get:
       summary: List products
       tags: [Product]
       responses:
-        '200': { description: OK }
+        "200": { description: OK }
 
   /products/{gtin}/prices:
     get:
@@ -442,13 +490,13 @@ paths:
           schema: { type: integer, default: 365, maximum: 365 }
           description: Max number of rows to return (default 365)
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProductPriceHistoryResponse'
-        '404':
+                $ref: "#/components/schemas/ProductPriceHistoryResponse"
+        "404":
           description: Product not found
 
   /page/{slug}:
@@ -461,14 +509,14 @@ paths:
           required: true
           schema: { type: string }
       responses:
-        '200': { description: OK }
+        "200": { description: OK }
 
   /settings:
     get:
       summary: All settings (key-value)
       tags: [Settings]
       responses:
-        '200': { description: OK }
+        "200": { description: OK }
 
   /settings/group/{group}:
     get:
@@ -480,7 +528,7 @@ paths:
           required: true
           schema: { type: string }
       responses:
-        '200': { description: OK }
+        "200": { description: OK }
 
   /settings/{key}:
     get:
@@ -492,7 +540,7 @@ paths:
           required: true
           schema: { type: string }
       responses:
-        '200': { description: OK }
+        "200": { description: OK }
 
   /ads:
     get:
@@ -512,20 +560,20 @@ paths:
           name: item
           schema: { type: string }
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
               schema:
                 type: array
-                items: { $ref: '#/components/schemas/Ad' }
+                items: { $ref: "#/components/schemas/Ad" }
 
   /generate-sitemap:
     get:
       summary: Generate or fetch sitemap data
       tags: [Sitemap]
       responses:
-        '200': { description: OK }
+        "200": { description: OK }
 
 components:
   securitySchemes:
@@ -584,17 +632,21 @@ components:
         image: { type: string, nullable: true }
         startDate: { type: string, format: date-time, nullable: true }
         endDate: { type: string, format: date-time, nullable: true }
-        item_type: { type: string, description: "Campaign type (e.g., general, actual, product, car, real-estate, coupon, credit)" }
+        item_type:
+          {
+            type: string,
+            description: "Campaign type (e.g., general, actual, product, car, real-estate, coupon, credit)",
+          }
         primary_brand:
           description: First associated brand for convenience
-          allOf: [ { $ref: '#/components/schemas/Brand' } ]
+          allOf: [{ $ref: "#/components/schemas/Brand" }]
           nullable: true
         brands:
           type: array
-          items: { $ref: '#/components/schemas/Brand' }
+          items: { $ref: "#/components/schemas/Brand" }
         categories:
           type: array
-          items: { $ref: '#/components/schemas/Category' }
+          items: { $ref: "#/components/schemas/Category" }
 
     LeadForm:
       type: object
@@ -633,7 +685,7 @@ components:
             title: { type: string }
         prices:
           type: array
-          items: { $ref: '#/components/schemas/PriceHistoryPoint' }
+          items: { $ref: "#/components/schemas/PriceHistoryPoint" }
 
     CampaignDetail:
       type: object
@@ -657,16 +709,16 @@ components:
         item_type: { type: string }
         primary_brand:
           description: First associated brand for convenience
-          allOf: [ { $ref: '#/components/schemas/Brand' } ]
+          allOf: [{ $ref: "#/components/schemas/Brand" }]
           nullable: true
         brands:
           type: array
-          items: { $ref: '#/components/schemas/Brand' }
+          items: { $ref: "#/components/schemas/Brand" }
         categories:
           type: array
-          items: { $ref: '#/components/schemas/Category' }
-        lead_form: { $ref: '#/components/schemas/LeadForm' }
-        product: { $ref: '#/components/schemas/Product' }
+          items: { $ref: "#/components/schemas/Category" }
+        lead_form: { $ref: "#/components/schemas/LeadForm" }
+        product: { $ref: "#/components/schemas/Product" }
 
     ActualItem:
       type: object
@@ -694,7 +746,7 @@ components:
         sort_order: { type: integer }
         items:
           type: array
-          items: { $ref: '#/components/schemas/ActualItem' }
+          items: { $ref: "#/components/schemas/ActualItem" }
 
     Pagination:
       type: object
@@ -706,4 +758,3 @@ components:
         hasPrevPage: { type: boolean }
         nextPage: { type: integer, nullable: true }
         prevPage: { type: integer, nullable: true }
-
