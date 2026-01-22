@@ -25,6 +25,7 @@ tags:
   - name: Pages
   - name: Settings
   - name: Ads
+  - name: Favorites
   - name: Sitemap
 
 paths:
@@ -209,6 +210,78 @@ paths:
               schema:
                 type: array
                 items: { $ref: "#/components/schemas/Brand" }
+
+  /favorites:
+    get:
+      summary: Get grouped favorites of current user
+      tags: [Favorites]
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: "#/components/schemas/FavoritesState" }
+    post:
+      summary: Add a favorite
+      tags: [Favorites]
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [target_type, target_id]
+              properties:
+                target_type:
+                  type: string
+                  enum: [campaign, post, brand, category]
+                target_id: { type: string, maxLength: 191 }
+      responses:
+        "200": { description: OK }
+    delete:
+      summary: Remove a favorite
+      tags: [Favorites]
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [target_type, target_id]
+              properties:
+                target_type:
+                  type: string
+                  enum: [campaign, post, brand, category]
+                target_id: { type: string, maxLength: 191 }
+      responses:
+        "200": { description: OK }
+
+  /favorites/sync:
+    post:
+      summary: Replace favorites in bulk
+      tags: [Favorites]
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FavoritesState"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: "#/components/schemas/FavoritesState" }
 
   /brands/all:
     get:
@@ -600,7 +673,11 @@ components:
         id: { type: integer }
         name: { type: string }
         slug: { type: string }
-        logo: { type: string, nullable: true }
+        logo:
+          type: string
+          format: uri
+          nullable: true
+          description: Full logo URL (CDN or public storage fallback)
 
     Category:
       type: object
@@ -719,6 +796,108 @@ components:
           items: { $ref: "#/components/schemas/Category" }
         lead_form: { $ref: "#/components/schemas/LeadForm" }
         product: { $ref: "#/components/schemas/Product" }
+        car:
+          $ref: "#/components/schemas/Car"
+          description: Present when item_type=car; image fields are absolute URLs
+          nullable: true
+        real_estate:
+          $ref: "#/components/schemas/RealEstate"
+          description: Present when item_type=real-estate
+          nullable: true
+        actuals:
+          type: array
+          description: Actual catalog files (images or PDFs). May be absolute URLs or relative paths under campaigns/actuals/{filename}.
+          items: { type: string }
+
+    Car:
+      type: object
+      properties:
+        id: { type: integer }
+        brand: { type: string }
+        model: { type: string }
+        attributes:
+          type: array
+          items:
+            type: object
+            properties:
+              name: { type: string }
+              value: { type: string }
+        images:
+          type: array
+          items:
+            type: string
+            format: uri
+            description: Absolute image URLs
+        colors:
+          type: array
+          items:
+            type: object
+            properties:
+              code: { type: string, description: Hex code without # }
+              name: { type: string }
+              image:
+                type: string
+                format: uri
+                description: Absolute image URL
+        euroncap:
+          type: object
+          properties:
+            testYear: { type: integer }
+            activePassengerScore: { type: number }
+            childPassengerScore: { type: number }
+            pedestrianPassengerScore: { type: number }
+            securityEquipmentScore: { type: number }
+        history_prices:
+          type: array
+          items:
+            type: object
+            properties:
+              date: { type: string, format: date }
+              price: { type: number }
+
+    RealEstate:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        delivery_date: { type: string, nullable: true }
+        property_type: { type: string, nullable: true }
+        number_of_units: { type: integer, nullable: true }
+        floor_count: { type: integer, nullable: true }
+        city: { type: string, nullable: true }
+        district: { type: string, nullable: true }
+        images:
+          type: array
+          items:
+            type: string
+            format: uri
+        price_plans:
+          type: array
+          items:
+            type: object
+            properties:
+              type: { type: string }
+              room_count: { type: string }
+              area: { type: string }
+              price: { type: number }
+              monthly_payment: { type: number, nullable: true }
+              down_payment: { type: number, nullable: true }
+
+    FavoritesState:
+      type: object
+      properties:
+        campaign:
+          type: array
+          items: { type: string }
+        post:
+          type: array
+          items: { type: string }
+        brand:
+          type: array
+          items: { type: string }
+        category:
+          type: array
+          items: { type: string }
 
     ActualItem:
       type: object
